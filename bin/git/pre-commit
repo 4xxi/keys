@@ -1,0 +1,193 @@
+#!/usr/bin/php
+<?php
+
+require __DIR__ . '/../../vendor/autoload.php';
+
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\ProcessBuilder;
+use Symfony\Component\Console\Application;
+
+class CodeQualityTool extends Application
+{
+    /** @var OutputInterface $output */
+    private $output;
+
+    /** @var InputInterface $output */
+    private $input;
+
+    const PHP_FILES_IN_SRC = '/^src\/(.*)(\.php)$/';
+
+    public function __construct()
+    {
+        parent::__construct('Code Quality Tool', '1.0.0');
+    }
+
+    public function doRun(InputInterface $input, OutputInterface $output)
+    {
+        $this->input = $input;
+        $this->output = $output;
+
+        $output->writeln('<info>### Code Quality Tool ##############</info>');
+        $output->write('<info>Fetching files... </info>');
+        $files = $this->getModifiedFiles();
+        $output->writeln('<info>OK!</info>');
+
+        $output->write('<info>Running PHPLint... </info>');
+        if (!$this->phpLint($files)) {
+            throw new Exception('There are some PHP syntax errors!');
+        }
+
+        // $output->write('<info>Checking composer files... </info>');
+        // $this->checkComposer($files);
+
+        $output->write('<info>Checking code style with `php-cs-fixer`... </info>');
+        if (!$this->codeStyle($files)) {
+            throw new Exception(sprintf('There are `php-cs-fixer` coding standards violations!'));
+        }
+
+        // We can call here $this->unitTests() after fixing PHPUnit tests.
+    }
+
+    /**
+     * @return array of changed files
+     */
+    private function getModifiedFiles()
+    {
+        $modifiedFiles = [];
+        exec('git diff --name-only --cached', $modifiedFiles);
+
+        return $modifiedFiles;
+    }
+
+    /**
+     * @param array $files
+     * @throws Exception
+     */
+    private function checkComposer(array $files)
+    {
+        $composerJsonDetected = false;
+        $composerLockDetected = false;
+
+        foreach ($files as $file) {
+            if ($file === 'composer.json') {
+                $composerJsonDetected = true;
+            }
+
+            if ($file === 'composer.lock') {
+                $composerLockDetected = true;
+            }
+        }
+
+        if ($composerJsonDetected && !$composerLockDetected) {
+            $this->output->writeln('<error>FAIL!</error>');
+            throw new Exception('File composer.lock must be commited if composer.json is modified!');
+        } else {
+            $this->output->writeln('<info>OK!</info>');
+        }
+    }
+
+    /**
+     * @param array $files
+     * @return bool
+     */
+    private function phpLint(array $files)
+    {
+        $brokenFiles = [];
+
+        $needle = '/(\.php)|(\.inc)$/';
+
+        foreach ($files as $file) {
+            if (!preg_match($needle, $file)) {
+                continue;
+            }
+
+            $processBuilder = new ProcessBuilder(array('php', '-l', $file));
+            $process = $processBuilder->getProcess();
+            $process->run();
+
+            if (!$process->isSuccessful()) {
+                $brokenFiles[] = $file;
+            }
+        }
+
+        if (count($brokenFiles)) {
+            $this->output->writeln('<error>FAIL!</error>');
+            $this->outputErrorFiles($brokenFiles);
+
+            return false;
+        }
+
+        $this->output->writeln('<info>OK!</info>');
+
+        return true;
+    }
+
+    /**
+     * @param array $files
+     * @return bool
+     */
+    private function codeStyle(array $files)
+    {
+        $brokenFiles = [];
+
+        foreach ($files as $file) {
+            $srcFile = preg_match(self::PHP_FILES_IN_SRC, $file);
+
+            if (!$srcFile || !file_exists(__DIR__.'/../../'.$file)) {
+                continue;
+            }
+
+            $processBuilder = new ProcessBuilder(array('php', 'bin/php-cs-fixer', '--level=symfony', '--dry-run', '--format=json', '--verbose', 'fix', $file));
+            $processBuilder->setWorkingDirectory(__DIR__.'/../../');
+            $phpCsFixer = $processBuilder->getProcess();
+            $phpCsFixer->run();
+
+            $output = json_decode(trim($phpCsFixer->getOutput()), true);
+            if (count($output['files'])) {
+                $brokenFiles[] = $file;
+            }
+        }
+
+        if (count($brokenFiles)) {
+            $this->output->writeln('<error>FAIL!</error>');
+            $this->outputErrorFiles($brokenFiles);
+
+            return false;
+        }
+
+        $this->output->writeln('<info>OK!</info>');
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function unitTests()
+    {
+        $processBuilder = new ProcessBuilder(['phpunit', '-c', 'app']);
+        $processBuilder->setWorkingDirectory(__DIR__ . '/../');
+        $processBuilder->setTimeout(3600);
+        $phpunit = $processBuilder->getProcess();
+
+        $phpunit->run(function ($type, $buffer) {
+            $this->output->write($buffer);
+        });
+
+        return $phpunit->isSuccessful();
+    }
+
+    /**
+     * @param array $brokenFiles
+     */
+    private function outputErrorFiles(array $brokenFiles)
+    {
+        foreach ($brokenFiles as $file) {
+            $this->output->writeln(sprintf('<error> > %s</error>', $file));
+        }
+    }
+}
+
+$console = new CodeQualityTool();
+$console->run();
