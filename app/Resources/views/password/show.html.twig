@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Password</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ password.id }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ password.title }}</td>
+            </tr>
+            <tr>
+                <th>Password</th>
+                <td>{{ password.password }}</td>
+            </tr>
+            <tr>
+                <th>Tags</th>
+                <td>{{ password.tags }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('password_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('password_edit', { 'id': password.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

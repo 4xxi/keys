@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Passwords list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Password</th>
+                <th>Tags</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for password in passwords %}
+            <tr>
+                <td><a href="{{ path('password_show', { 'id': password.id }) }}">{{ password.id }}</a></td>
+                <td>{{ password.title }}</td>
+                <td>{{ password.password }}</td>
+                <td>{{ password.tags }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('password_show', { 'id': password.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('password_edit', { 'id': password.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('password_new') }}">Create a new password</a>
+        </li>
+    </ul>
+{% endblock %}
