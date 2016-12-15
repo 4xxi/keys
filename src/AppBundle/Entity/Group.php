@@ -17,4 +17,26 @@ class Group extends BaseGroup
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
+    /**
+     * @var bool
+     * @ORM\Column(type="boolean", options={"default"=false})
+     */
+    private $private = false;
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return $this->private;
+    }
+
+    /**
+     * @param bool $private
+     */
+    public function setPrivate($private)
+    {
+        $this->private = $private;
+    }
 }

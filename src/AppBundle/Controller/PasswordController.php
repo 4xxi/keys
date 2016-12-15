@@ -2,10 +2,14 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Ajax\AjaxError;
+use AppBundle\Ajax\AjaxResponse;
+use AppBundle\Entity\Group;
 use AppBundle\Entity\Password;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,13 +25,19 @@ class PasswordController extends Controller
      * Lists all password entities.
      *
      * @Route("/", name="password_index")
+     * @Route("/group/{group}", name="password_index")
      * @Method("GET")
      */
-    public function indexAction()
+    public function indexAction(Group $group = null)
     {
-        $em = $this->getDoctrine()->getManager();
+        if ($group && !$this->getUser()->getGroups()->contains($group)) {
+            return $this->createNotFoundException();
+        }
 
-        $passwords = $em->getRepository('AppBundle:Password')->findAll();
+        $groupIds = $group ? [$group->getId()] : $this->getUser()->getGroupIds();
+
+        $em = $this->getDoctrine()->getManager();
+        $passwords = $em->getRepository('AppBundle:Password')->findByGroups($groupIds);
 
         return $this->render('password/index.html.twig', array(
             'passwords' => $passwords,
@@ -51,11 +61,12 @@ class PasswordController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $password->addGroup($this->getUser()->getPrivateGroup());
             $em = $this->getDoctrine()->getManager();
             $em->persist($password);
             $em->flush();
 
-            return $this->redirectToRoute('password_show', array('id' => $password->getId()));
+            return $this->redirectToRoute('password_index');
         }
 
         return $this->render('password/new.html.twig', array(
@@ -65,21 +76,22 @@ class PasswordController extends Controller
     }
 
     /**
-     * Finds and displays a password entity.
+     * Finds and displays a password.
      *
-     * @Route("/{id}", name="password_show")
-     * @Method("GET")
+     * @Route("/{id}", name="ajax_password_show")
+     * @Method("POST")
+     *
      * @param Password $password
-     * @return Response
+     *
+     * @return JsonResponse
      */
     public function showAction(Password $password)
     {
-        $deleteForm = $this->createDeleteForm($password);
+        if ($password->canBeViewedBy($this->getUser())) {
+            return new AjaxResponse($password->getPassword());
+        }
 
-        return $this->render('password/show.html.twig', array(
-            'password' => $password,
-            'delete_form' => $deleteForm->createView(),
-        ));
+        return new AjaxError('User isn\'t eligible to view the password.');
     }
 
     /**
@@ -87,26 +99,27 @@ class PasswordController extends Controller
      *
      * @Route("/{id}/edit", name="password_edit")
      * @Method({"GET", "POST"})
-     * @param Request $request
+     *
+     * @param Request  $request
      * @param Password $password
+     *
      * @return RedirectResponse|Response
      */
     public function editAction(Request $request, Password $password)
     {
-        $deleteForm = $this->createDeleteForm($password);
         $editForm = $this->createForm('AppBundle\Form\PasswordType', $password);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            return $this->redirectToRoute('password_edit', array('id' => $password->getId()));
+            return $this->redirectToRoute('password_index');
         }
 
         return $this->render('password/edit.html.twig', array(
             'password' => $password,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
+            'form' => $editForm->createView(),
+            'form_delete' => $this->createDeleteForm($password)->createView(),
         ));
     }
 
@@ -115,8 +128,10 @@ class PasswordController extends Controller
      *
      * @Route("/{id}", name="password_delete")
      * @Method("DELETE")
-     * @param Request $request
+     *
+     * @param Request  $request
      * @param Password $password
+     *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function deleteAction(Request $request, Password $password)
@@ -126,7 +141,7 @@ class PasswordController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->remove($password);
+            $em->getRepository('AppBundle:Password')->removeByUser($password, $this->getUser());
             $em->flush();
         }
 

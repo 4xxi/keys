@@ -90,3 +90,9 @@ fos_user:
             template:   email/registration.email.twig
     group:
         group_class: AppBundle\Entity\Group
+
+stof_doctrine_extensions:
+    default_locale: en_US
+    orm:
+        default:
+            timestampable: true

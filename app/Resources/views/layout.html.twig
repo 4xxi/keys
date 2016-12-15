@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/scripts.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+<div class="wrapper">
+
+    {{ include('sidebar.html.twig') }}
+
+    <div class="main-panel">
+        {{ include('header.html.twig') }}
+
+        <div class="content">
+            <div class="container-fluid">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+
+        {{ include('footer.html.twig') }}
+    </div>
+</div>
+{% endblock %}
