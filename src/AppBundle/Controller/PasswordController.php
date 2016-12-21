@@ -25,7 +25,7 @@ class PasswordController extends Controller
      * Lists all password entities.
      *
      * @Route("/", name="password_index")
-     * @Route("/group/{group}", name="password_index")
+     * @Route("/group/{group}", name="password_index_by_group")
      * @Method("GET")
      */
     public function indexAction(Group $group = null)
@@ -41,6 +41,35 @@ class PasswordController extends Controller
 
         return $this->render('password/index.html.twig', array(
             'passwords' => $passwords,
+            'group' => $group,
+        ));
+    }
+
+    /**
+     * Search passwords by keyword.
+     *
+     * @Route("/search", name="password_search_keyword")
+     * @Method("GET")
+     *
+     * @param Request $request
+     *
+     * @return Response|\Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function searchByKeywordAction(Request $request)
+    {
+        $keyword = $request->query->get('keyword');
+        if (!$keyword) {
+            return $this->redirectToRoute('password_index');
+        }
+
+        $groupIds = $this->getUser()->getGroupIds();
+
+        $em = $this->getDoctrine()->getManager();
+        $passwords = $em->getRepository('AppBundle:Password')->findByGroupsAndKeyword($groupIds, $keyword);
+
+        return $this->render('password/search.html.twig', array(
+            'passwords' => $passwords,
+            'keyword' => $keyword,
         ));
     }
 
@@ -62,9 +91,12 @@ class PasswordController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $password->addGroup($this->getUser()->getPrivateGroup());
+            $password->setOwnerGroup($this->getUser()->getPrivateGroup());
             $em = $this->getDoctrine()->getManager();
             $em->persist($password);
             $em->flush();
+
+            $this->addFlash('success', 'Password was created!');
 
             return $this->redirectToRoute('password_index');
         }
@@ -112,6 +144,8 @@ class PasswordController extends Controller
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
+
+            $this->addFlash('success', 'Password was updated!');
 
             return $this->redirectToRoute('password_index');
         }

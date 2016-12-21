@@ -19,24 +19,30 @@
         <ul class="nav">
             <li class="{{ _self.activeClassOrNot(path('password_index')) }}">
                 <a href="{{ path('password_index') }}">
-                    <i class="material-icons">content_paste</i>
+                    <i class="material-icons">folder_open</i>
                     <p>All Passwords</p>
                 </a>
             </li>
-            <li class="{{ _self.activeClassOrNot(path('password_index', {group: app.user.privateGroup.id})) }}">
-                <a href="{{ path('password_index', {group: app.user.privateGroup.id}) }}">
-                    <i class="material-icons">content_paste</i>
+            <li class="{{ _self.activeClassOrNot(path('password_index_by_group', {group: app.user.privateGroup.id})) }}">
+                <a href="{{ path('password_index_by_group', {group: app.user.privateGroup.id}) }}">
+                    <i class="material-icons">folder_open</i>
                     <p>My Passwords</p>
                 </a>
             </li>
             {% for group in app.user.groups if group.id != app.user.privateGroup.id %}
-                <li class="{{ _self.activeClassOrNot(path('password_index', {group: group.id})) }}">
-                    <a href="{{ path('password_index', {group: group.id}) }}">
-                        <i class="material-icons">content_paste</i>
+                <li class="{{ _self.activeClassOrNot(path('password_index_by_group', {group: group.id})) }}">
+                    <a href="{{ path('password_index_by_group', {group: group.id}) }}">
+                        <i class="material-icons">folder_shared</i>
                         <p>{{ group.name }}</p>
                     </a>
                 </li>
             {% endfor %}
+            <li>
+                <a href="{{ path('group_new') }}">
+                    <i class="material-icons">add_circle</i>
+                    <p>Add group</p>
+                </a>
+            </li>
         </ul>
     </div>
     <div class="sidebar-background"></div>

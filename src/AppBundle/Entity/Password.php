@@ -58,6 +58,21 @@ class Password
     private $groups;
 
     /**
+     * @var Group $ownerGroup
+     *
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Group")
+     */
+    private $ownerGroup;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->groups = new ArrayCollection();
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -138,22 +153,15 @@ class Password
     {
         return $this->tags;
     }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->groups = new \Doctrine\Common\Collections\ArrayCollection();
-    }
 
     /**
      * Add group
      *
-     * @param \AppBundle\Entity\Group $group
+     * @param Group $group
      *
      * @return Password
      */
-    public function addGroup(\AppBundle\Entity\Group $group)
+    public function addGroup(Group $group)
     {
         $this->groups[] = $group;
 
@@ -163,9 +171,9 @@ class Password
     /**
      * Remove group
      *
-     * @param \AppBundle\Entity\Group $group
+     * @param Group $group
      */
-    public function removeGroup(\AppBundle\Entity\Group $group)
+    public function removeGroup(Group $group)
     {
         $this->groups->removeElement($group);
     }
@@ -181,11 +189,31 @@ class Password
     }
 
     /**
+     * @return Group
+     */
+    public function getOwnerGroup()
+    {
+        return $this->ownerGroup;
+    }
+
+    /**
+     * @param Group $ownerGroup
+     */
+    public function setOwnerGroup($ownerGroup)
+    {
+        $this->ownerGroup = $ownerGroup;
+    }
+
+    /**
      * @param User $user
      * @return bool
      */
     public function canBeViewedBy(User $user)
     {
+        if ($user->hasRole('ROLE_SUPER_ADMIN')) {
+            return true;
+        }
+
         foreach ($user->getGroups() as $group) {
             if ($this->getGroups()->contains($group)) {
                 return true;
@@ -201,7 +229,7 @@ class Password
      */
     public function canBeEditedByUser(User $user)
     {
-        return $this->getGroups()->contains($user->getPrivateGroup());
+        return $user->hasRole('ROLE_ADMIN') || $this->getGroups()->contains($user->getPrivateGroup());
     }
 
     /**
@@ -210,6 +238,6 @@ class Password
      */
     public function canBeRemovedByUser(User $user)
     {
-        return $this->canBeEditedByUser($user);
+        return $user->hasRole('ROLE_ADMIN') || $this->canBeEditedByUser($user);
     }
 }

@@ -32,6 +32,28 @@ class PasswordRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /**
+     * @param array $groupIds
+     * @param string $keyword
+     *
+     * @return mixed
+     */
+    public function findByGroupsAndKeyword(array $groupIds, $keyword)
+    {
+        return $this->createQueryBuilder('p')
+            ->select('p')
+            ->join('p.groups', 'g')
+            ->where('g.id IN (:groupIds)')
+            ->andWhere('LOWER(p.title) LIKE :keyword OR LOWER(p.tags) LIKE :keyword')
+            ->orderBy('p.updatedAt', Criteria::DESC)
+            ->setParameter('groupIds', $groupIds)
+            ->setParameter('keyword', '%'.mb_strtolower($keyword).'%')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * TODO: move to pre-delete callback.
+     *
      * @param Password $password
      * @param User     $user
      */

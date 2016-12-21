@@ -1,6 +1,5 @@
 {% extends 'base.html.twig' %}
 
-
 {% block javascripts %}
     {{ parent() }}
     <script src="{{ asset('js/scripts.js') }}"></script>
@@ -9,13 +8,29 @@
 {% block body %}
 <div class="wrapper">
 
-    {{ include('sidebar.html.twig') }}
+    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        {{ include('sidebar.html.twig') }}
+    {% endif %}
 
-    <div class="main-panel">
+    <div class="main-panel {% block mainPanelClasses %}{% endblock %}">
+
         {{ include('header.html.twig') }}
 
         <div class="content">
             <div class="container-fluid">
+                {% for type, messages in app.session.flashBag.all %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }}">
+                            <div class="container-fluid">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true"><i class="material-icons">clear</i></span>
+                                </button>
+                                <b>{{ type }}:</b> {{ message|trans }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
                 {% block content %}{% endblock %}
             </div>
         </div>
