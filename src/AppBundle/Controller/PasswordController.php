@@ -6,6 +6,7 @@ use AppBundle\Ajax\AjaxError;
 use AppBundle\Ajax\AjaxResponse;
 use AppBundle\Entity\Group;
 use AppBundle\Entity\Password;
+use AppBundle\Form\PasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -86,11 +87,10 @@ class PasswordController extends Controller
     public function newAction(Request $request)
     {
         $password = new Password();
-        $form = $this->createForm('AppBundle\Form\PasswordType', $password);
+        $form = $this->createForm(PasswordType::class, $password, ['user' => $this->getUser()]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $password->addGroup($this->getUser()->getPrivateGroup());
             $password->setOwnerGroup($this->getUser()->getPrivateGroup());
             $em = $this->getDoctrine()->getManager();
             $em->persist($password);
@@ -139,7 +139,7 @@ class PasswordController extends Controller
      */
     public function editAction(Request $request, Password $password)
     {
-        $editForm = $this->createForm('AppBundle\Form\PasswordType', $password);
+        $editForm = $this->createForm(PasswordType::class, $password, ['user' => $this->getUser()]);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
