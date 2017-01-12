@@ -1,0 +1,7 @@
+dev:
+    host:          "<host>"
+    user:          "deploy"
+    identity_file: ~
+    stage:         "staging"
+    deploy_path:   "</path/to/project>"
+    branch:        "develop"
