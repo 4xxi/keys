@@ -1,3 +1,5 @@
+{% import _self as macros %}
+
 {% macro activeClassOrNot(url) %}
     {% if url == app.request.requestUri %}active{% endif %}
 {% endmacro %}
@@ -17,20 +19,20 @@
 
     <div class="sidebar-wrapper">
         <ul class="nav">
-            <li class="{{ _self.activeClassOrNot(path('password_index')) }}">
+            <li class="{{ macros.activeClassOrNot(path('password_index')) }}">
                 <a href="{{ path('password_index') }}">
                     <i class="material-icons">folder_open</i>
                     <p>All Passwords</p>
                 </a>
             </li>
-            <li class="{{ _self.activeClassOrNot(path('password_index_by_group', {group: app.user.privateGroup.id})) }}">
+            <li class="{{ macros.activeClassOrNot(path('password_index_by_group', {group: app.user.privateGroup.id})) }}">
                 <a href="{{ path('password_index_by_group', {group: app.user.privateGroup.id}) }}">
                     <i class="material-icons">folder_open</i>
                     <p>My Passwords</p>
                 </a>
             </li>
             {% for group in app.user.groups if group.id != app.user.privateGroup.id %}
-                <li class="{{ _self.activeClassOrNot(path('password_index_by_group', {group: group.id})) }}">
+                <li class="{{ macros.activeClassOrNot(path('password_index_by_group', {group: group.id})) }}">
                     <a href="{{ path('password_index_by_group', {group: group.id}) }}">
                         <i class="material-icons">folder_shared</i>
                         <p>{{ group.name }}</p>

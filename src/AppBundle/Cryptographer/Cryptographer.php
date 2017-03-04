@@ -6,8 +6,8 @@ class Cryptographer implements CryptographerInterface
 {
     const ALGORITHM = 'aes-256-cbc';
 
-    /* TODO: move out into parameters.yml */
     const PASS = '12345';
+
     const IV = 'd
 ??2??Ǝ?[?5???';
 

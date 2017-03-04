@@ -44,7 +44,7 @@ class PasswordType extends AbstractType
                         ->addOrderBy('LOWER(g.name)', 'ASC')
                         ->setParameter('userId', $options['user']->getId());
                 },
-                'group_by' => function ($val, $key, $index) {
+                'group_by' => function (Group $val) {
                     return $val->isPrivate() ? 'Users' : 'Groups';
                 },
                 'choice_label' => 'name',

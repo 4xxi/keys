@@ -52,8 +52,6 @@ class PasswordRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /**
-     * TODO: move to pre-delete callback.
-     *
      * @param Password $password
      * @param User     $user
      */
