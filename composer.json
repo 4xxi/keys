@@ -1,7 +1,22 @@
 {
-    "name": "pluseg/keys",
-    "license": "proprietary",
-    "type": "project",
+    "name": "4xxi/keys",
+    "description": "The app for private and corporate keys management.",
+    "license": "MIT",
+    "homepage": "https://github.com/4xxi/keys",
+    "support": {
+        "issues": "https://github.com/4xxi/keys/issues",
+        "source": "https://github.com/4xxi/keys"
+    },
+    "authors": [
+        {
+            "name": "Maxim Kuznetsov",
+            "email": "mk@4xxi.com"
+        },
+        {
+            "name": "4xxi.com",
+            "email": "hello@4xxi.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "": "src/"
