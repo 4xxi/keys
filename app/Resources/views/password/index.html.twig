@@ -1,0 +1,25 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-12 col-md-12">
+
+        {% if group and not group.isPrivate %}
+            <p>
+                Users of <b>{{ group.name }}:</b>
+                &nbsp;
+                {% for u in group.users %}
+                    <span class="label label-info">{{ u.username }}</span>
+                {% endfor %}
+                {% if group.canBeEditedByUser(app.user) %}
+                    <a href="{{ path('group_edit', {'id': group.id }) }}">
+                        <i class="material-icons">edit</i>
+                    </a>
+                {% endif %}
+            </p>
+        {% endif %}
+
+        {{ include('password/_list.html.twig', {passwords: passwords}) }}
+    </div>
+</div>
+{% endblock %}

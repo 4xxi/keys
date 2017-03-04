@@ -1,0 +1,36 @@
+<nav class="navbar navbar-transparent navbar-absolute">
+    <div class="container-fluid">
+        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{ path('password_new') }}"><i class="material-icons">add</i> Add password</a>
+            </div>
+        {% endif %}
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                        <a href="{{ path('fos_user_security_logout') }}">
+                            {{ app.user.username }} |
+                            <i class="material-icons">person</i>
+                        </a>
+                    {% else %}
+                        <a href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
+                    {% endif %}
+                </li>
+            </ul>
+
+            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                <form class="navbar-form navbar-right" role="search" action="{{ path('password_search_keyword') }}" method="GET">
+                    <div class="form-group {{ keyword|default('') ? 'is-empty' : ''}}">
+                        <input type="text" class="form-control" placeholder="Search" name="keyword" value="{{ keyword|default('') }}">
+                        <span class="material-input"></span>
+                        <span class="material-input"></span>
+                    </div>
+                    <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                        <i class="material-icons">search</i><div class="ripple-container"></div>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</nav>
