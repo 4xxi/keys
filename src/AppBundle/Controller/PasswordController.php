@@ -6,7 +6,7 @@ use AppBundle\Ajax\AjaxError;
 use AppBundle\Ajax\AjaxResponse;
 use AppBundle\Entity\Group;
 use AppBundle\Entity\Password;
-use AppBundle\Form\PasswordType;
+use AppBundle\Form\Type\PasswordType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;

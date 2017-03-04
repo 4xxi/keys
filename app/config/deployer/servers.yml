@@ -1,6 +1,6 @@
 dev:
     host:          "<host>"
-    user:          "deploy"
+    user:          "<username>"
     identity_file: ~
     stage:         "staging"
     deploy_path:   "</path/to/project>"

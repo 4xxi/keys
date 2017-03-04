@@ -194,7 +194,6 @@
   }
 
   // hint to browser for optimization
-  //    TODO: evaluate effectiveness - looking for community feedback
   &.label-floating label.control-label {
     will-change: left, top, contents;
   }

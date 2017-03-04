@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Group;
+use AppBundle\Form\Type\GroupType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
@@ -43,7 +44,7 @@ class GroupController extends Controller
         /** @var Group $group */
         $group = $groupManager->createGroup('');
 
-        $form = $this->createForm('AppBundle\Form\GroupType', $group);
+        $form = $this->createForm(GroupType::class, $group);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -89,7 +90,7 @@ class GroupController extends Controller
     public function editAction(Request $request, Group $group)
     {
         $deleteForm = $this->createDeleteForm($group);
-        $editForm = $this->createForm('AppBundle\Form\GroupType', $group);
+        $editForm = $this->createForm(GroupType::class, $group);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {

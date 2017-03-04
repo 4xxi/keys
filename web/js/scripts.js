@@ -3,21 +3,6 @@ $(document).ready(function() {
         var $this = $(this);
         copyToClipboard($this.data('secret'));
 
-        // TODO: ask the frontenders about copying text to clipboard from ajax. Now it's restricted by browser.
-        // $this.data('text', $this.text());
-        // $this.prop('disabled', true);
-        // $.post($this.data('url'), function(response) {
-        //     if (response && !response.status) {
-        //         alert(response.message || 'Something goes wrong!');
-        //     } else {
-        //         copyToClipboard(response.data);
-        //     }
-        // }).fail(function() {
-        //     $this.text('Error!').removeClass('btn-info').addClass('btn-error');
-        // }).always(function() {
-        //     $this.removeAttr('disabled');
-        // });
-
         return false;
     });
 

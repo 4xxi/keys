@@ -23,6 +23,6 @@ task('reload:php-fpm', function () {
     run('sudo service php7.1-fpm reload');
 });
 
-//after('deploy:symlink', 'database:migrate');
+after('deploy:symlink', 'database:migrate');
 after('deploy', 'reload:php-fpm');
 after('rollback', 'reload:php-fpm');
