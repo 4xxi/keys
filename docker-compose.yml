@@ -1,0 +1,52 @@
+version: '2.1'
+
+services:
+    web:
+        image: 4xxi/php-mysql
+        depends_on:
+          db:
+            condition: service_started
+        volumes:
+          - ./:/var/www/server
+        expose:
+          - "9000"
+        environment:
+          SYMFONY_ENV: ${SYMFONY_ENV}
+        links:
+          - db
+        stdin_open: true
+        tty: true
+    nginx:
+        image: 4xxi/nginx
+        depends_on:
+          web:
+            condition: service_started
+        volumes_from:
+          - web
+        volumes:
+          - ./var/logs:/var/log/nginx
+        ports:
+          - "${HTTP_PORT}:80"
+    db:
+        image: mysql:latest
+        volumes:
+          - dbdata:/var/lib/mysql
+        ports:
+          - "${DB_PORT}:5432"
+        environment:
+          MYSQL_DATABASE: ${MYSQL_DATABASE}
+          MYSQL_USER: ${MYSQL_USER}
+          MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+          MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    # db:
+    #     image: postgres:latest
+    #     volumes:
+    #       - ./db:/var/lib/postgresql/data
+    #     ports:
+    #       - "${DB_PORT}:5432"
+    #     environment:
+    #       POSTGRES_DB: ${POSTGRES_DB}
+    #       POSTGRES_USER: ${POSTGRES_USER}
+    #       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+volumes:
+  dbdata: {}

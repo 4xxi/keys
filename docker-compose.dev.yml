@@ -1,0 +1,6 @@
+version: '2.1'
+
+services:
+  web:
+    environment:
+      SYMFONY_ENV: 'dev'
